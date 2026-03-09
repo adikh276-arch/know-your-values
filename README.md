@@ -45,7 +45,7 @@ Understand what matters to you. Identifying and living by your core values is es
 
 ## Deployment
 
-This project includes a `Dockerfile` and `vite-nginx.conf` for hosting on a subpath `/know_your_values/`.
+This project includes a `Dockerfile` and `vite-nginx.conf` for hosting on a subpath `/know_your_value/`.
 
 ### Docker Build
 

@@ -25,4 +25,4 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64
-          tags: bunker.mantracare.com/lovable/know_your_values:1.0
+          tags: bunker.mantracare.com/lovable/know_your_value:1.0
