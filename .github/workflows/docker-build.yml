@@ -25,7 +25,7 @@ jobs:
           context: .
           push: true
           platforms: linux/amd64
-          tags: bunker.mantracare.com/lovable/know_your_value:1.0
+          tags: bunker.mantracare.com/lovable/know_your_values:1.0
           build-args: |
             VITE_DATABASE_URL=postgresql://neondb_owner:npg_kflMt85LnsNu@ep-solitary-glitter-a1419gib-pooler.ap-southeast-1.aws.neon.tech/neondb?sslmode=require&channel_binding=require
             VITE_NEON_PROJECT_ID=ancient-queen-75365745

@@ -19,7 +19,7 @@ const App = () => (
       <Toaster />
       <Sonner />
       <AuthProvider>
-        <BrowserRouter basename="/know_your_value">
+        <BrowserRouter basename="/know_your_values">
           <LanguageSelector />
           <Routes>
             <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
