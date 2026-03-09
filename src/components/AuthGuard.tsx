@@ -14,7 +14,7 @@ export const AuthGuard: React.FC<{ children: React.ReactNode }> = ({ children })
 
     if (!userId) {
         // Should have been handled in AuthProvider, but as a secondary guard:
-        window.location.href = "/token";
+        window.location.href = "https://mantracare.com/token";
         return null;
     }
 
