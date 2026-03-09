@@ -1,25 +1,26 @@
 import { Pool, neonConfig } from "@neondatabase/serverless";
 
-// Optional: allow connection from browser for development if needed
-// neonConfig.fetchConnectionCache = true;
+// Allow connection from browser
+neonConfig.fetchConnectionCache = true;
 
 const connectionString = (import.meta.env?.VITE_DATABASE_URL) || "";
+
+if (!connectionString) {
+    console.warn("VITE_DATABASE_URL is not defined. Check your environment variables.");
+}
 
 export const pool = new Pool({
     connectionString: connectionString,
 });
 
-export const query = async (text: string, params?: any[]) => {
-    const client = await pool.connect();
+export const sql = async (text: string, params?: any[]) => {
     try {
-        const res = await client.query(text, params);
+        const res = await pool.query(text, params || []);
         return res;
-    } finally {
-        client.release();
+    } catch (error) {
+        console.error("Database query error:", error);
+        throw error;
     }
 };
 
-// For simpler queries
-export const sql = async (text: string, params?: any[]) => {
-    return query(text, params);
-}
+export const query = sql;
