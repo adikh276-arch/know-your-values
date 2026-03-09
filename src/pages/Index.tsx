@@ -7,24 +7,12 @@ import { allValues } from "@/data/values";
 import { Reflection, ValueItem } from "@/types/reflection";
 import { format } from "date-fns";
 
-const STORAGE_KEY = "values-reflections";
-
-const getHistory = (): Reflection[] => {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-  } catch {
-    return [];
-  }
-};
-
-const saveReflection = (r: Reflection) => {
-  const history = getHistory();
-  history.unshift(r);
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(history));
-};
+import { useAuth } from "@/components/AuthContext";
+import { sql } from "@/lib/db";
 
 const Index = () => {
   const { t } = useTranslation();
+  const { userId } = useAuth();
   const [screen, setScreen] = useState<"intro" | "choose" | "reflect" | "action" | "summary" | "history">("intro");
   const [selectedValues, setSelectedValues] = useState<ValueItem[]>([]);
   const [chosenValue, setChosenValue] = useState<ValueItem | null>(null);
@@ -32,10 +20,24 @@ const Index = () => {
   const [actionText, setActionText] = useState("");
   const [history, setHistory] = useState<Reflection[]>([]);
   const [savedReflection, setSavedReflection] = useState<Reflection | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchHistory = async () => {
+    if (!userId) return;
+    setIsLoading(true);
+    try {
+      const res = await sql("SELECT id, user_id, date, value_emoji as \"valueEmoji\", value_name as \"valueName\", reflection, action FROM reflections WHERE user_id = $1 ORDER BY date DESC", [userId]);
+      setHistory(res.rows);
+    } catch (err) {
+      console.error("Failed to fetch history:", err);
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    setHistory(getHistory());
-  }, []);
+    fetchHistory();
+  }, [userId]);
 
   const toggleValue = (v: ValueItem) => {
     setSelectedValues((prev) =>
@@ -45,23 +47,35 @@ const Index = () => {
     );
   };
 
-  const handleSave = () => {
-    if (!chosenValue) return;
-    const r: Reflection = {
-      id: Date.now().toString(),
+  const handleSave = async () => {
+    if (!chosenValue || !userId) return;
+    setIsLoading(true);
+    const r: Omit<Reflection, 'id'> = {
       date: new Date().toISOString(),
       valueEmoji: chosenValue.emoji,
       valueName: chosenValue.name,
       reflection: reflectionText,
       action: actionText,
     };
-    saveReflection(r);
-    setSavedReflection(r);
-    setScreen("summary");
+
+    try {
+      const res = await sql(
+        "INSERT INTO reflections (user_id, date, value_emoji, value_name, reflection, action) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id",
+        [userId, r.date, r.valueEmoji, r.valueName, r.reflection, r.action]
+      );
+
+      const fullReflection: Reflection = { ...r, id: res.rows[0].id.toString() };
+      setSavedReflection(fullReflection);
+      setScreen("summary");
+    } catch (err) {
+      console.error("Failed to save reflection:", err);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const handleFinish = () => {
-    setHistory(getHistory());
+    fetchHistory();
     setScreen("history");
   };
 
@@ -98,7 +112,7 @@ const Index = () => {
               {t('app.startReflection')}
             </ActivityButton>
             <button
-              onClick={() => { setHistory(getHistory()); setScreen("history"); }}
+              onClick={() => { fetchHistory(); setScreen("history"); }}
               className="w-full mt-3 text-sm text-muted-foreground hover:text-primary transition-colors"
             >
               {t('app.viewHistory')}
@@ -161,8 +175,8 @@ const Index = () => {
                   key={v.name}
                   onClick={() => setChosenValue(v)}
                   className={`text-sm px-4 py-2 rounded-full transition-all duration-200 ${chosenValue?.name === v.name
-                      ? "bg-primary text-primary-foreground"
-                      : "bg-accent text-accent-foreground hover:bg-primary/10"
+                    ? "bg-primary text-primary-foreground"
+                    : "bg-accent text-accent-foreground hover:bg-primary/10"
                     }`}
                 >
                   {v.emoji} {t(`values.${v.name}`)}

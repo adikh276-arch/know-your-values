@@ -8,6 +8,9 @@ import NotFound from "./pages/NotFound";
 
 import LanguageSelector from "./components/LanguageSelector";
 
+import { AuthProvider } from "./components/AuthContext";
+import { AuthGuard } from "./components/AuthGuard";
+
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -15,14 +18,16 @@ const App = () => (
     <TooltipProvider>
       <Toaster />
       <Sonner />
-      <BrowserRouter basename="/know_your_value">
-        <LanguageSelector />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
+      <AuthProvider>
+        <BrowserRouter basename="/know_your_value">
+          <LanguageSelector />
+          <Routes>
+            <Route path="/" element={<AuthGuard><Index /></AuthGuard>} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </AuthProvider>
     </TooltipProvider>
   </QueryClientProvider>
 );
