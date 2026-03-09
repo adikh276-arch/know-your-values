@@ -7,6 +7,8 @@ import { allValues } from "@/data/values";
 import { Reflection, ValueItem } from "@/types/reflection";
 import { format } from "date-fns";
 
+import { toast } from "sonner";
+
 import { useAuth } from "@/components/AuthContext";
 import { sql } from "@/lib/db";
 
@@ -30,6 +32,7 @@ const Index = () => {
       setHistory(res.rows);
     } catch (err) {
       console.error("Failed to fetch history:", err);
+      toast.error("Failed to load history from database");
     } finally {
       setIsLoading(false);
     }
@@ -67,8 +70,10 @@ const Index = () => {
       const fullReflection: Reflection = { ...r, id: res.rows[0].id.toString() };
       setSavedReflection(fullReflection);
       setScreen("summary");
+      toast.success("Reflection saved to database");
     } catch (err) {
       console.error("Failed to save reflection:", err);
+      toast.error("Failed to save reflection to database");
     } finally {
       setIsLoading(false);
     }
