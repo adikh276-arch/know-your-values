@@ -51,7 +51,11 @@ const Index = () => {
   };
 
   const handleSave = async () => {
-    if (!chosenValue || !userId) return;
+    console.log("handleSave called. userId:", userId, "chosenValue:", chosenValue);
+    if (!chosenValue || !userId) {
+      console.warn("Missing chosenValue or userId. Skipping save.");
+      return;
+    }
     setIsLoading(true);
     const r: Omit<Reflection, 'id'> = {
       date: new Date().toISOString(),

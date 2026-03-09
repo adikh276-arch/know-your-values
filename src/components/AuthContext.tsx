@@ -45,6 +45,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
                                 console.error("Failed to init user in DB:", dbErr);
                             }
 
+                            console.log("Auth: Token validated, user_id:", uid);
                             setUserId(uid);
                             // Remove token from URL
                             const newUrl = window.location.pathname + window.location.search.replace(/[?&]token=[^&]+/, '').replace(/^&/, '?');
